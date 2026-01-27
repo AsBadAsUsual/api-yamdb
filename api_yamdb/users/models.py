@@ -6,7 +6,6 @@ class CustomUser(AbstractUser):
     role = models.CharField('Роль', max_length=30, blank=True)
     bio = models.TextField('Биография', blank=True)
     confirmation_code = models.CharField(
-        unique=True,
         max_length=255,
         blank=True,
         null=True
