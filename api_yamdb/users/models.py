@@ -7,7 +7,9 @@ class CustomUser(AbstractUser):
     bio = models.TextField('Биография')
     confirmation_code = models.CharField(
         unique=True,
-        max_length=255
+        max_length=255,
+        blank=True,
+        null=True
     )
 
     class Meta:
