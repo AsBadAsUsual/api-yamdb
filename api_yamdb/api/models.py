@@ -1,5 +1,5 @@
 import datetime as dt
-from .constanses import SYMBOLS_FOR_TEXT_FIELD
+from .constants import SYMBOLS_FOR_TEXT_FIELD
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -42,12 +42,14 @@ class Title(models.Model):
     )
     category = models.ForeignKey(
         Category,
-        on_delete=models.CASCADE,
-        verbose_name='Категория произведения'
+        on_delete=models.SET_NULL,
+        verbose_name='Категория произведения',
+        null=True
     )
     genre = models.ManyToManyField(
         Genre,
-        verbose_name='Жанр произведения'
+        verbose_name='Жанр произведения',
+        null=True
     )
     description = models.TextField('Описание произведения')
 
