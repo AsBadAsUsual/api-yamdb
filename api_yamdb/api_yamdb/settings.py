@@ -98,6 +98,11 @@ USE_L10N = True
 
 USE_TZ = True
 
+#REST_FRAMEWORK
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
+}
 
 # Static files (CSS, JavaScript, Images)
 

@@ -3,18 +3,11 @@ from rest_framework import serializers
 from .models import Title, Category, Genre
 
 
-class TitlesSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Title
-        fields = ("id", "name", "year","category", "genre", "description")
-
 class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ("id", "name", "year", "category", "genre", "description")
-        read_only_fields = ("id",)
+        fields = ("id", "name", "year","category", "genre", "description")
 
 class CategorySerializer(serializers.ModelSerializer):
 

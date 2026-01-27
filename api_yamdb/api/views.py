@@ -1,36 +1,45 @@
 from rest_framework import viewsets, mixins
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 
 from .models import Title, Category, Genre
-from .serializers import TitlesSerializer, TitleSerializer, CategorySerializer, GenreSerializer
+from .serializers import TitleSerializer, CategorySerializer, GenreSerializer
 
 
-class TitlesViewSet(mixins.CreateModelMixin,
-                    mixins.ListModelMixin,
-                    viewsets.GenericViewSet):
-    """Получение всех произведений, добавление нового произведения"""
-    queryset = Title.objects.all()
-    serializer_class = TitlesSerializer
-    permission_classes = [AllowAny,]
+class PermissionMixin:
+    def get_permissions(self):
+        if self.action in ("create", "update", "partial_update", "destroy"):
+             return [AllowAny()]
+        return [AllowAny()]
 
-class TitleViewSet(viewsets.ModelViewSet):
-    """Получение, удаление, изменение конкретного произведения"""
+
+class TitleViewSet(PermissionMixin, viewsets.ModelViewSet):
+    """
+    Получение всех произведений, добавление нового произведения.
+    /id/ Получение, удаление, изменение конкретного произведения
+    """
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = [AllowAny,]
 
-class CategoryViewSet(mixins.CreateModelMixin,
+
+class CategoryViewSet(PermissionMixin,
+                    mixins.CreateModelMixin,
                     mixins.ListModelMixin,
+                    mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
-    """Получение, удаление, изменение категорий произведений"""
+    """Получение, удаление, категорий произведений"""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [AllowAny,]
+    lookup_field = 'slug'
 
-class GenreViewSet(mixins.CreateModelMixin,
+
+class GenreViewSet(PermissionMixin,
+                    mixins.CreateModelMixin,
                     mixins.ListModelMixin,
+                    mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
-    """Получение, удаление, изменение жанров произведений"""
+    """Получение, удаление, жанров произведений"""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [AllowAny,]
+    lookup_field = 'slug'
