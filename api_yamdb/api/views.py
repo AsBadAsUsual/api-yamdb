@@ -1,3 +1,4 @@
+from rest_framework import viewsets, mixins
 from django.core.mail import EmailMessage
 from rest_framework import status, viewsets, mixins
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
@@ -6,8 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import CustomUser
 from .pagination import StandardResultsSetPagination
-from .models import Title, Category, Genre
-from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, GetTokenSerializer, SignUpSerializer,
+from .models import Title, Category, Genre, Review
+from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, GetTokenSerializer, SignUpSerializer
+
 
 
 class APIGetToken(APIView):
@@ -106,4 +108,10 @@ class GenreViewSet(PermissionMixin,
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     lookup_field = 'slug'
->>>>>>> 9effaf5259be82d4735c38e9725142afeb7d3862
+
+
+class ReviewsViewSet(PermissionMixin, viewsets.ModelViewSet):
+    """Получение, создание, изменение, удаление обзоров на произведений"""
+
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer

@@ -49,7 +49,6 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Жанр произведения',
-        null=True
     )
     description = models.TextField('Описание произведения')
 
@@ -111,4 +110,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text[:SYMBOLS_FOR_TEXT_FIELD]
->>>>>>> 9effaf5259be82d4735c38e9725142afeb7d3862

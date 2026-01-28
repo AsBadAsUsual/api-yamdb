@@ -1,5 +1,4 @@
 from django.contrib import admin
-
 from .models import (Category, Comment, Genre,
                      Review, Title)
 
@@ -62,9 +61,13 @@ class TitleAdmin(admin.ModelAdmin):
         'name',
         'year',
         'category',
-        'genre',
+        'get_genres',
         'description',
     )
+
+    def get_genres(self, obj):
+        return ", ".join([genre.name for genre in obj.genre.all()])
+
+    get_genres.short_description = 'Жанры'
     ordering = ('name',)
     search_fields = ('name', 'year')
->>>>>>> 9effaf5259be82d4735c38e9725142afeb7d3862
