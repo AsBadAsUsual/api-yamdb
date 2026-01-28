@@ -1,8 +1,8 @@
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from .pagination import StandardResultsSetPagination
-from .models import Title, Category, Genre
-from .serializers import TitleSerializer, CategorySerializer, GenreSerializer
+from .models import Title, Category, Genre, Review
+from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, ReviewSerializer
 
 
 class PermissionMixin:
@@ -44,3 +44,10 @@ class GenreViewSet(PermissionMixin,
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     lookup_field = 'slug'
+
+
+class ReviewsViewSet(PermissionMixin, viewsets.ModelViewSet):
+    """Получение, создание, изменение, удаление обзоров на произведений"""
+
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
