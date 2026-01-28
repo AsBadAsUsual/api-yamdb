@@ -1,6 +1,6 @@
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
-
+from .pagination import StandardResultsSetPagination
 from .models import Title, Category, Genre
 from .serializers import TitleSerializer, CategorySerializer, GenreSerializer
 
@@ -19,6 +19,7 @@ class TitleViewSet(PermissionMixin, viewsets.ModelViewSet):
     """
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    pagination_class = StandardResultsSetPagination
 
 
 class CategoryViewSet(PermissionMixin,
