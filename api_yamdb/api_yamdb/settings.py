@@ -22,9 +22,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+<<<<<<< HEAD
     'rest_framework_simplejwt',
     'django_filters',
     'api',
+=======
+    'api',
+    'users',
+>>>>>>> 9effaf5259be82d4735c38e9725142afeb7d3862
 ]
 
 MIDDLEWARE = [
@@ -89,7 +94,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
@@ -99,6 +104,11 @@ USE_L10N = True
 
 USE_TZ = True
 
+#REST_FRAMEWORK
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
+}
 
 # Static files (CSS, JavaScript, Images)
 
@@ -106,8 +116,12 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
+<<<<<<< HEAD
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+=======
+AUTH_USER_MODEL = 'users.CustomUser'
+>>>>>>> 9effaf5259be82d4735c38e9725142afeb7d3862

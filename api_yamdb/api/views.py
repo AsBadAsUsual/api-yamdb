@@ -1,27 +1,27 @@
 from django.core.mail import EmailMessage
-from django.db.models import Avg
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, viewsets, mixins
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from users.models import User
-from .serializers import (GetTokenSerializer, SignUpSerializer,)
+from users.models import CustomUser
+from .pagination import StandardResultsSetPagination
+from .models import Title, Category, Genre
+from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, GetTokenSerializer, SignUpSerializer,
 
 
 class APIGetToken(APIView):
+    """
+    Получение JWT-токена при использовании username и confirmation code.
+    Доступно без токена.
+    """
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:
-            user = User.objects.get(username=data['username'])
-        except User.DoesNotExist:
+            user = CustomUser.objects.get(username=data['username'])
+        except CustomUser.DoesNotExist:
             return Response(
                 {'username': 'Пользователь не найден!'},
                 status=status.HTTP_404_NOT_FOUND)
@@ -35,7 +35,11 @@ class APIGetToken(APIView):
 
 
 class APISignup(APIView):
-    permission_classes = (permissions.AllowAny,)
+    """
+    Получить код подтверждения на переданный email. Права доступа: Доступно без
+    токена. Поля email и username должны быть уникальными.
+    """
+    permission_classes = (AllowAny,)
 
     @staticmethod
     def send_email(data):
@@ -61,3 +65,45 @@ class APISignup(APIView):
         }
         self.send_email(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PermissionMixin:
+    def get_permissions(self):
+        if self.action in ("create", "update", "partial_update", "destroy"):
+             return [AllowAny()]
+        return [AllowAny()]
+
+
+class TitleViewSet(PermissionMixin, viewsets.ModelViewSet):
+    """
+    Получение всех произведений, добавление нового произведения.
+    /id/ Получение, удаление, изменение конкретного произведения
+    """
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    pagination_class = StandardResultsSetPagination
+
+
+class CategoryViewSet(PermissionMixin,
+                    mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet):
+    """Получение, удаление, категорий произведений"""
+
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+
+
+class GenreViewSet(PermissionMixin,
+                    mixins.CreateModelMixin,
+                    mixins.ListModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet):
+    """Получение, удаление, жанров произведений"""
+
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    lookup_field = 'slug'
+>>>>>>> 9effaf5259be82d4735c38e9725142afeb7d3862
