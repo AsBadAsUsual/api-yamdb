@@ -1,4 +1,3 @@
-from rest_framework import viewsets, mixins
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, mixins
@@ -135,11 +134,11 @@ class ReviewsViewSet(PermissionMixin, viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        new_queryset = Review.objects.filter(title=self.kwargs.get('title_id'))
+        new_queryset = Review.objects.filter(title=self.kwargs.get('title_pk'))
         return new_queryset
 
     def perform_create(self, serializer):
-        title_id = self.kwargs.get('title_id')
+        title_id = self.kwargs.get('title_pk')
         title = get_object_or_404(Title, id=title_id)
         serializer.save(author=self.request.user, title=title)
 
@@ -151,10 +150,14 @@ class CommentsViewSet(PermissionMixin, viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        new_queryset = Comment.objects.filter(review=self.kwargs.get('review_id'))
-        return new_queryset
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_pk'),
+            title_id=self.kwargs.get('title_pk')
+        )
+        return review.comments.all()
 
     def perform_create(self, serializer):
-        review_id = self.kwargs.get('review_id')
+        review_id = self.kwargs.get('review_pk')
         review = get_object_or_404(Title, id=review_id)
         serializer.save(author=self.request.user, review=review)

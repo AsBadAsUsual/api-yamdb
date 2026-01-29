@@ -1,7 +1,7 @@
 import datetime as dt
 from rest_framework import serializers
 
-from .models import Title, Category, Genre, Review
+from .models import Title, Category, Genre, Review, Comment
 from users.models import CustomUser
 
 
@@ -76,7 +76,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request and request.method == "POST":
             user = request.user
-            title_id = self.context["view"].kwargs.get("title_id")
+            title_id = self.context["view"].kwargs.get("title_pk")
             if Review.objects.filter(author=user, title_id=title_id).exists():
                 raise serializers.ValidationError("Вы уже оставили отзыв на это произведение.")
         return data
@@ -84,6 +84,6 @@ class ReviewSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Category
+        model = Comment
         fields = ("id", "text", "author", "pub_date")
         read_only_fields = ("author", "pub_date")
