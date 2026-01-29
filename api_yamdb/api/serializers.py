@@ -14,8 +14,8 @@ class GetTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = (
-            'username',
-            'confirmation_code'
+            "username",
+            "confirmation_code"
         )
 
 
@@ -37,7 +37,7 @@ class SignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'username')
+        fields = ("email", "username")
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -48,7 +48,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def validate_year(self, value):
         if value > dt.date.today().year:
-            raise serializers.ValidationError('Нельзя добавлять произведения будущего!')
+            raise serializers.ValidationError("Нельзя добавлять произведения будущего!")
         return value
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -64,19 +64,26 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ("name", "slug")
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field='username',
+    author = serializers.SlugRelatedField(slug_field="username",
     read_only=True)
 
     class Meta:
         model = Review
-        fields = ("author", "text", "score", "pub_date", "title")
-        read_only_fields = ('author', 'pub_date')
+        fields = ("id", "text", "author", "score", "pub_date")
+        read_only_fields = ("author", "pub_date")
 
     def validate(self, data):
-        request = self.context.get('request')
-        if request and request.method == 'POST':
+        request = self.context.get("request")
+        if request and request.method == "POST":
             user = request.user
-            title_id = self.context['view'].kwargs.get('title_id')
+            title_id = self.context["view"].kwargs.get("title_id")
             if Review.objects.filter(author=user, title_id=title_id).exists():
                 raise serializers.ValidationError("Вы уже оставили отзыв на это произведение.")
         return data
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        fields = ("id", "text", "author", "pub_date")
+        read_only_fields = ("author", "pub_date")
