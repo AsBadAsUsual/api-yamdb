@@ -11,7 +11,6 @@ from .models import Title, Category, Genre, Review
 from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, GetTokenSerializer, SignUpSerializer
 
 
-
 class APIGetToken(APIView):
     """
     Получение JWT-токена при использовании username и confirmation code.
@@ -72,7 +71,7 @@ class APISignup(APIView):
 class PermissionMixin:
     def get_permissions(self):
         if self.action in ("create", "update", "partial_update", "destroy"):
-             return [AllowAny()]
+            return [AllowAny()]
         return [AllowAny()]
 
 
