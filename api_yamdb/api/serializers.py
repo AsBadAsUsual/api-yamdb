@@ -19,6 +19,20 @@ class GetTokenSerializer(serializers.ModelSerializer):
         )
 
 
+class UserMeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'lust_name',
+            'bio',
+            'role',
+        )
+        read_only_fields = ('role',)
+
+
 class SignUpSerializer(serializers.ModelSerializer):
 
     class Meta:
