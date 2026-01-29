@@ -14,7 +14,7 @@ class CustomUser(AbstractUser):
         (MODERATOR, 'Moderator'),
         (USER, 'User')
     )
-
+    email = models.EmailField(unique=True)
     role = models.CharField(
         'Роль',
         max_length=20,
