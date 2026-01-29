@@ -9,6 +9,7 @@ from users.models import CustomUser
 from .pagination import StandardResultsSetPagination
 from .models import Title, Category, Genre, Review, Comment
 from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, GetTokenSerializer, SignUpSerializer, CommentSerializer, UserMeSerializer
+from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrAuthor
 
 
 class APIGetToken(APIView):
@@ -86,14 +87,7 @@ class UserMeView(APIView):
         return Response(serializer.data)
 
 
-class PermissionMixin:
-    def get_permissions(self):
-        if self.action in ("create", "update", "partial_update", "destroy"):
-            return [AllowAny()]
-        return [AllowAny()]
-
-
-class TitleViewSet(PermissionMixin, viewsets.ModelViewSet):
+class TitleViewSet(IsAdminOrReadOnly, viewsets.ModelViewSet):
     """
     Получение всех произведений, добавление нового произведения.
     /id/ Получение, удаление, изменение конкретного произведения
@@ -103,7 +97,7 @@ class TitleViewSet(PermissionMixin, viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
 
 
-class CategoryViewSet(PermissionMixin,
+class CategoryViewSet(IsAdminOrReadOnly,
                     mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.DestroyModelMixin,
@@ -115,7 +109,7 @@ class CategoryViewSet(PermissionMixin,
     lookup_field = 'slug'
 
 
-class GenreViewSet(PermissionMixin,
+class GenreViewSet(IsAdminOrReadOnly,
                     mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.DestroyModelMixin,
@@ -127,7 +121,7 @@ class GenreViewSet(PermissionMixin,
     lookup_field = 'slug'
 
 
-class ReviewsViewSet(PermissionMixin, viewsets.ModelViewSet):
+class ReviewsViewSet(IsAdminOrModeratorOrAuthor, viewsets.ModelViewSet):
     """Получение, создание, изменение, удаление обзоров на произведений"""
 
     queryset = Review.objects.all()
@@ -143,7 +137,7 @@ class ReviewsViewSet(PermissionMixin, viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=title)
 
 
-class CommentsViewSet(PermissionMixin, viewsets.ModelViewSet):
+class CommentsViewSet(IsAdminOrModeratorOrAuthor, viewsets.ModelViewSet):
     """Получение, создание, изменение, удаление комментариев на обзоры"""
 
     queryset = Comment.objects.all()
