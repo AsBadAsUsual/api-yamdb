@@ -1,4 +1,3 @@
-from rest_framework import viewsets, mixins
 from django.core.mail import EmailMessage
 from rest_framework import status, viewsets, mixins
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
@@ -132,3 +131,13 @@ class ReviewsViewSet(PermissionMixin, viewsets.ModelViewSet):
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        new_queryset = Review.objects.filter(title=self.title_id)
+        return new_queryset
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            title=self.title_id
+        )
