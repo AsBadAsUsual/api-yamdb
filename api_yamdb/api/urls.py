@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter
 
 from django.urls import include, path
 
-from .views import APIGetToken, APISignup, TitleViewSet, CategoryViewSet, GenreViewSet, ReviewsViewSet
+from .views import APIGetToken, APISignup, TitleViewSet, CategoryViewSet, GenreViewSet, ReviewsViewSet, UserMeView
 
 
 router = DefaultRouter()
@@ -15,4 +15,5 @@ urlpatterns = [
     path("v1/", include(router.urls)),
     path('v1/auth/token/', APIGetToken.as_view(), name='get_token'),
     path('v1/auth/signup/', APISignup.as_view(), name='signup'),
+    path('v1/users/me/', UserMeView.as_view(), name='me')
 ]

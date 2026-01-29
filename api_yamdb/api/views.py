@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from users.models import CustomUser
 from .pagination import StandardResultsSetPagination
 from .models import Title, Category, Genre, Review
-from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, GetTokenSerializer, SignUpSerializer
+from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, GetTokenSerializer, SignUpSerializer, UserMeSerializer
 
 
 class APIGetToken(APIView):
@@ -66,6 +66,24 @@ class APISignup(APIView):
         }
         self.send_email(data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class UserMeView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        serializer = UserMeSerializer(request.user)
+        return Response(serializer.data, status=200)
+    
+    def patch(self, request):
+        serializer = UserMeSerializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 
 class PermissionMixin:
