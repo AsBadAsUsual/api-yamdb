@@ -3,13 +3,14 @@ from rest_framework_nested import routers
 
 from django.urls import include, path
 
-from .views import APIGetToken, APISignup, TitleViewSet, CategoryViewSet, GenreViewSet, ReviewsViewSet, CommentsViewSet, UserMeView
+from .views import APIGetToken, APISignup, TitleViewSet, CategoryViewSet, GenreViewSet, ReviewsViewSet, CommentsViewSet, UserViewSet
 
 
 router = DefaultRouter()
-router.register("titles", TitleViewSet, basename="titles")
-router.register("categories", CategoryViewSet, basename="categories")
-router.register("genres", GenreViewSet, basename="genres")
+router.register(r"titles", TitleViewSet, basename="titles")
+router.register(r"categories", CategoryViewSet, basename="categories")
+router.register(r"genres", GenreViewSet, basename="genres")
+router.register(r'users', UserViewSet, basename='users')
 
 titles_router = routers.NestedSimpleRouter(router, r'titles', lookup='title')
 titles_router.register(r'reviews', ReviewsViewSet, basename='title-reviews')
@@ -23,5 +24,4 @@ urlpatterns = [
     path('v1/', include(reviews_router.urls)),
     path('v1/auth/token/', APIGetToken.as_view(), name='get_token'),
     path('v1/auth/signup/', APISignup.as_view(), name='signup'),
-    path('v1/users/me/', UserMeView.as_view(), name='me')
 ]

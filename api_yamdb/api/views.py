@@ -1,6 +1,7 @@
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, mixins
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
@@ -8,8 +9,9 @@ from rest_framework.views import APIView
 from users.models import CustomUser
 from .pagination import StandardResultsSetPagination
 from management.models import Title, Category, Genre, Review, Comment
-from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, GetTokenSerializer, SignUpSerializer, CommentSerializer, UserMeSerializer
-from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrAuthor
+from .serializers import (TitleSerializer, CategorySerializer, GenreSerializer, UserSerializer,
+                          ReviewSerializer, GetTokenSerializer, SignUpSerializer, CommentSerializer)
+from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrAuthor, IsAdmin
 
 
 class APIGetToken(APIView):
@@ -69,22 +71,25 @@ class APISignup(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class UserMeView(APIView):
-    permission_classes = (IsAuthenticated,)
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    pagination_class = StandardResultsSetPagination
+    lookup_field = 'username'
+    permission_classes = [IsAdmin,]
 
-    def get(self, request):
-        serializer = UserMeSerializer(request.user)
-        return Response(serializer.data, status=200)
-
-    def patch(self, request):
-        serializer = UserMeSerializer(
+    @action(detail=False,
+            methods=['get', 'patch'],
+            permission_classes=[IsAuthenticated])
+    def me(self, request):
+        serializer = self.get_serializer(
             request.user,
             data=request.data,
-            partial=True
-        )
+            partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
 
 
 class TitleViewSet(viewsets.ModelViewSet):

@@ -1,5 +1,8 @@
 import datetime as dt
+import re
 from rest_framework import serializers
+
+from django.core.validators import RegexValidator
 
 from management.models import Title, Category, Genre, Review, Comment
 from users.models import CustomUser
@@ -19,18 +22,39 @@ class GetTokenSerializer(serializers.ModelSerializer):
         )
 
 
-class UserMeSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = CustomUser
         fields = (
             'username',
             'email',
             'first_name',
-            'lust_name',
+            'last_name',
             'bio',
             'role',
         )
-        read_only_fields = ('role',)
+
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get('request')
+        if request and not (request.user.is_authenticated and request.user.is_admin):
+            fields['role'].read_only = True
+        return fields
+
+    def validate_username(self, value):
+        if not re.match(r'^[\w.@+-]+\Z', value):
+            raise serializers.ValidationError(
+                'Недопустимые символы в username'
+            )
+        if len(value) > 150:
+            raise serializers.ValidationError(
+                'Username слишком длинный'
+            )
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя "me" запрещено'
+            )
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -38,6 +62,20 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ("email", "username")
+
+    def validate_username(self, value):
+        if not re.match(r'^[\w.@+-]+\Z', value):
+            raise serializers.ValidationError(
+                'Недопустимые символы в username'
+            )
+        if len(value) > 150:
+            raise serializers.ValidationError(
+                'Username слишком длинный'
+            )
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя "me" запрещено'
+            )
 
 
 class TitleSerializer(serializers.ModelSerializer):

@@ -25,3 +25,13 @@ class IsAdminOrModeratorOrAuthor(BasePermission):
             or request.user.is_moderator
             or request.user.is_admin
         )
+
+
+class IsAdmin(BasePermission):
+    """Пермишн даёт доступ только админу"""
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.is_admin
+
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_authenticated and request.user.is_admin
