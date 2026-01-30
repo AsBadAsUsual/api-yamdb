@@ -83,6 +83,12 @@ class Review(models.Model):
     class Meta:
         default_related_name = 'reviews'
         ordering = ['-pub_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_review'
+            )
+        ]
 
     def __str__(self):
         return self.text[:SYMBOLS_FOR_TEXT_FIELD]
