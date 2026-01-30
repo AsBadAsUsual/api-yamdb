@@ -8,16 +8,19 @@ from django.dispatch import receiver
 class CustomUser(AbstractUser):
     """Кастомная модель юзера."""
 
-    ADMIN = 'Admin'
-    MODERATOR = 'Moderator'
-    USER = 'User'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
 
     ROLE_CHOISES = (
         (ADMIN, 'Admin'),
         (MODERATOR, 'Moderator'),
         (USER, 'User')
     )
-    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(max_length=254, unique=True)
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
     role = models.CharField(
         'Роль',
         max_length=20,
