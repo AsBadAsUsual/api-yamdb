@@ -1,13 +1,13 @@
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, mixins
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import CustomUser
 from .pagination import StandardResultsSetPagination
-from .models import Title, Category, Genre, Review, Comment
+from management.models import Title, Category, Genre, Review, Comment
 from .serializers import TitleSerializer, CategorySerializer, GenreSerializer, ReviewSerializer, GetTokenSerializer, SignUpSerializer, CommentSerializer, UserMeSerializer
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrAuthor
 

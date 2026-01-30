@@ -1,7 +1,7 @@
 import datetime as dt
 from rest_framework import serializers
 
-from .models import Title, Category, Genre, Review, Comment
+from management.models import Title, Category, Genre, Review, Comment
 from users.models import CustomUser
 
 

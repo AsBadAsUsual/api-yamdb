@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import (Category, Comment, Genre,
                      Review, Title)
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = (
@@ -11,6 +12,7 @@ class CategoryAdmin(admin.ModelAdmin):
     )
     ordering = ('name',)
     search_fields = ('name',)
+
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
@@ -34,6 +36,7 @@ class GenreAdmin(admin.ModelAdmin):
     )
     ordering = ('name',)
     search_fields = ('name',)
+
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
