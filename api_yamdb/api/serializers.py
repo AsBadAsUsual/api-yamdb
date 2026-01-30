@@ -3,6 +3,7 @@ import re
 from rest_framework import serializers
 
 from django.core.validators import RegexValidator
+from django.contrib.auth.tokens import default_token_generator
 
 from reviews.models import Title, Category, Genre, Review, Comment
 from users.models import CustomUser
@@ -55,13 +56,13 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Имя "me" запрещено'
             )
+        return value
 
 
-class SignUpSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.Serializer):
 
-    class Meta:
-        model = CustomUser
-        fields = ("email", "username")
+    email = serializers.EmailField(required=True, max_length=254)
+    username = serializers.CharField(required=True, max_length=150)
 
     def validate_username(self, value):
         if not re.match(r'^[\w.@+-]+\Z', value):
@@ -76,6 +77,56 @@ class SignUpSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Имя "me" запрещено'
             )
+        return value
+
+    def validate(self, data):
+        email = data.get('email')
+        username = data.get('username')
+        
+        try:
+            existing_user = CustomUser.objects.get(email=email)
+            if existing_user.username != username:
+                raise serializers.ValidationError({
+                    'email': ['Пользователь с таким email уже зарегистрирован.']
+                })
+        except CustomUser.DoesNotExist:
+            pass
+        
+        try:
+            existing_user = CustomUser.objects.get(username=username)
+            if existing_user.email != email:
+                raise serializers.ValidationError({
+                    'username': ['Этот username уже занят.']
+                })
+        except CustomUser.DoesNotExist:
+            pass
+        
+        return data
+    
+    def create(self, validated_data):
+        if 'email' not in validated_data or 'username' not in validated_data:
+            raise serializers.ValidationError({
+                'email': ['Обязательное поле.'],
+                'username': ['Обязательное поле.']
+            })
+        
+        email = validated_data['email']
+        username = validated_data['username']
+        
+        try:
+            user = CustomUser.objects.get(email=email)
+            user.confirmation_code = default_token_generator.make_token(user)
+            user.save(update_fields=['confirmation_code'])
+            return user
+        except CustomUser.DoesNotExist:
+            user = CustomUser.objects.create(
+                username=username,
+                email=email,
+                is_active=False
+            )
+            user.set_unusable_password()
+            user.save()
+            return user
 
 
 class CategorySerializer(serializers.ModelSerializer):

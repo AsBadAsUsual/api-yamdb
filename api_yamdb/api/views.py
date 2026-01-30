@@ -10,8 +10,10 @@ from rest_framework.views import APIView
 from users.models import CustomUser
 from .pagination import StandardResultsSetPagination
 from reviews.models import Title, Category, Genre, Review, Comment
-from .serializers import (TitleReadSerializer, TitleWriteSerializer, CategorySerializer, GenreSerializer, UserSerializer,
-                          ReviewSerializer, GetTokenSerializer, SignUpSerializer, CommentSerializer)
+from .serializers import (TitleReadSerializer, TitleWriteSerializer,
+                          CategorySerializer, GenreSerializer, UserSerializer,
+                          ReviewSerializer, GetTokenSerializer,
+                          SignUpSerializer, CommentSerializer)
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrAuthor, IsAdmin
 
 
@@ -90,7 +92,6 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-
 
 
 class TitleViewSet(viewsets.ModelViewSet):
