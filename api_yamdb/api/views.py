@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import CustomUser
 from .pagination import StandardResultsSetPagination
-from management.models import Title, Category, Genre, Review, Comment
+from reviews.models import Title, Category, Genre, Review, Comment
 from .serializers import (TitleSerializer, CategorySerializer, GenreSerializer, UserSerializer,
                           ReviewSerializer, GetTokenSerializer, SignUpSerializer, CommentSerializer)
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrAuthor, IsAdmin
