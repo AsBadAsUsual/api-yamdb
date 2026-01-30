@@ -106,6 +106,7 @@ class CategoryViewSet(IsAdminOrReadOnly,
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = StandardResultsSetPagination
     lookup_field = 'slug'
 
 
@@ -118,6 +119,7 @@ class GenreViewSet(IsAdminOrReadOnly,
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    pagination_class = StandardResultsSetPagination
     lookup_field = 'slug'
 
 
