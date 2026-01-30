@@ -1,6 +1,7 @@
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets, mixins
+from django.db.models import Avg
+from rest_framework import status, viewsets, mixins, filters
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,7 +10,7 @@ from rest_framework.views import APIView
 from users.models import CustomUser
 from .pagination import StandardResultsSetPagination
 from reviews.models import Title, Category, Genre, Review, Comment
-from .serializers import (TitleSerializer, CategorySerializer, GenreSerializer, UserSerializer,
+from .serializers import (TitleReadSerializer, TitleWriteSerializer, CategorySerializer, GenreSerializer, UserSerializer,
                           ReviewSerializer, GetTokenSerializer, SignUpSerializer, CommentSerializer)
 from .permissions import IsAdminOrReadOnly, IsAdminOrModeratorOrAuthor, IsAdmin
 
@@ -98,9 +99,38 @@ class TitleViewSet(viewsets.ModelViewSet):
     /id/ Получение, удаление, изменение конкретного произведения
     """
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     pagination_class = StandardResultsSetPagination
     permission_classes = (IsAdminOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = Title.objects.annotate(
+            rating=Avg('reviews__score')
+        ).order_by('id')
+
+        genre_slug = self.request.query_params.get('genre')
+        category_slug = self.request.query_params.get('category')
+        year = self.request.query_params.get('year')
+        name = self.request.query_params.get('name')
+
+        if genre_slug:
+            queryset = queryset.filter(genre__slug=genre_slug)
+
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+
+        if year:
+            queryset = queryset.filter(year=year)
+
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        return queryset
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleReadSerializer
+        return TitleWriteSerializer
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
@@ -113,6 +143,8 @@ class CategoryViewSet(mixins.CreateModelMixin,
     serializer_class = CategorySerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
     lookup_field = 'slug'
 
 
@@ -126,6 +158,8 @@ class GenreViewSet(mixins.CreateModelMixin,
     serializer_class = GenreSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
     lookup_field = 'slug'
 
 
@@ -133,7 +167,9 @@ class ReviewsViewSet(viewsets.ModelViewSet):
     """Получение, создание, изменение, удаление обзоров на произведений"""
 
     queryset = Review.objects.all()
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     serializer_class = ReviewSerializer
+    pagination_class = StandardResultsSetPagination
     permission_classes = (IsAdminOrModeratorOrAuthor,)
 
     def get_queryset(self):
@@ -150,7 +186,9 @@ class CommentsViewSet(viewsets.ModelViewSet):
     """Получение, создание, изменение, удаление комментариев на обзоры"""
 
     queryset = Comment.objects.all()
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
     serializer_class = CommentSerializer
+    pagination_class = StandardResultsSetPagination
     permission_classes = (IsAdminOrModeratorOrAuthor,)
 
     def get_queryset(self):
@@ -163,5 +201,5 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         review_id = self.kwargs.get('review_pk')
-        review = get_object_or_404(Title, id=review_id)
+        review = get_object_or_404(Review, id=review_id)
         serializer.save(author=self.request.user, review=review)
