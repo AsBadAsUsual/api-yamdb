@@ -87,7 +87,7 @@ class UserMeView(APIView):
         return Response(serializer.data)
 
 
-class TitleViewSet(IsAdminOrReadOnly, viewsets.ModelViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
     """
     Получение всех произведений, добавление нового произведения.
     /id/ Получение, удаление, изменение конкретного произведения
@@ -95,10 +95,10 @@ class TitleViewSet(IsAdminOrReadOnly, viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = StandardResultsSetPagination
+    permission_classes = (IsAdminOrReadOnly,)
 
 
-class CategoryViewSet(IsAdminOrReadOnly,
-                    mixins.CreateModelMixin,
+class CategoryViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
@@ -106,11 +106,12 @@ class CategoryViewSet(IsAdminOrReadOnly,
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    pagination_class = StandardResultsSetPagination
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 
-class GenreViewSet(IsAdminOrReadOnly,
-                    mixins.CreateModelMixin,
+class GenreViewSet(mixins.CreateModelMixin,
                     mixins.ListModelMixin,
                     mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
@@ -118,14 +119,17 @@ class GenreViewSet(IsAdminOrReadOnly,
 
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    pagination_class = StandardResultsSetPagination
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 
-class ReviewsViewSet(IsAdminOrModeratorOrAuthor, viewsets.ModelViewSet):
+class ReviewsViewSet(viewsets.ModelViewSet):
     """Получение, создание, изменение, удаление обзоров на произведений"""
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = (IsAdminOrModeratorOrAuthor,)
 
     def get_queryset(self):
         new_queryset = Review.objects.filter(title=self.kwargs.get('title_pk'))
@@ -137,11 +141,12 @@ class ReviewsViewSet(IsAdminOrModeratorOrAuthor, viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=title)
 
 
-class CommentsViewSet(IsAdminOrModeratorOrAuthor, viewsets.ModelViewSet):
+class CommentsViewSet(viewsets.ModelViewSet):
     """Получение, создание, изменение, удаление комментариев на обзоры"""
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = (IsAdminOrModeratorOrAuthor,)
 
     def get_queryset(self):
         review = get_object_or_404(

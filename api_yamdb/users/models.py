@@ -8,14 +8,14 @@ from django.dispatch import receiver
 class CustomUser(AbstractUser):
     """Кастомная модель юзера."""
 
-    ADMIN = 'Admin'
-    MODERATOR = 'Moderator'
-    USER = 'User'
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
 
     ROLE_CHOISES = (
-        (ADMIN, 'Admin'),
-        (MODERATOR, 'Moderator'),
-        (USER, 'User')
+        (ADMIN, 'admin'),
+        (MODERATOR, 'moderator'),
+        (USER, 'user')
     )
     email = models.EmailField(unique=True)
     role = models.CharField(
