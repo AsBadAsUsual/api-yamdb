@@ -80,6 +80,10 @@ class UserViewSet(viewsets.ModelViewSet):
     pagination_class = StandardResultsSetPagination
     lookup_field = 'username'
     permission_classes = [IsAdmin,]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['username', 'email']
+
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options', 'trace']
 
     @action(detail=False,
             methods=['get', 'patch'],
