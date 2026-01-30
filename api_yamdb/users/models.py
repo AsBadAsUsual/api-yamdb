@@ -13,9 +13,9 @@ class CustomUser(AbstractUser):
     USER = 'user'
 
     ROLE_CHOISES = (
-        (ADMIN, 'Admin'),
-        (MODERATOR, 'Moderator'),
-        (USER, 'User')
+        (ADMIN, 'admin'),
+        (MODERATOR, 'moderator'),
+        (USER, 'user')
     )
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(max_length=254, unique=True)

@@ -24,7 +24,6 @@ class GetTokenSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-
     class Meta:
         model = CustomUser
         fields = (
@@ -35,6 +34,13 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
+
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get('request')
+        if request and not (request.user.is_authenticated and request.user.is_admin):
+            fields['role'].read_only = True
+        return fields
 
     def validate_username(self, value):
         if not re.match(r'^[\w.@+-]+\Z', value):
@@ -49,21 +55,6 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Имя "me" запрещено'
             )
-
-
-# class UserMeSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = CustomUser
-#         fields = (
-#             'username',
-#             'email',
-#             'first_name',
-#             'last_name',
-#             'bio',
-#             'role',
-#         )
-#         read_only_fields = ('role',)
 
 
 class SignUpSerializer(serializers.ModelSerializer):

@@ -78,28 +78,19 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     permission_classes = [IsAdmin,]
 
-    @action(detail=False, methods=['get', 'patch'], permission_classes=[IsAuthenticated])
+    @action(detail=False,
+            methods=['get', 'patch'],
+            permission_classes=[IsAuthenticated])
     def me(self, request):
-        serializer = self.get_serializer(request.user)
+        serializer = self.get_serializer(
+            request.user,
+            data=request.data,
+            partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
+    
 
-
-# class UserMeView(APIView):
-#     permission_classes = (IsAuthenticated,)
-
-#     def get(self, request):
-#         serializer = UserMeSerializer(request.user)
-#         return Response(serializer.data, status=200)
-
-#     def patch(self, request):
-#         serializer = UserMeSerializer(
-#             request.user,
-#             data=request.data,
-#             partial=True
-#         )
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response(serializer.data)
 
 
 class TitleViewSet(IsAdminOrReadOnly, viewsets.ModelViewSet):

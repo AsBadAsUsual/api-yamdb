@@ -7,10 +7,10 @@ from .views import APIGetToken, APISignup, TitleViewSet, CategoryViewSet, GenreV
 
 
 router = DefaultRouter()
-router.register("titles", TitleViewSet, basename="titles")
-router.register("categories", CategoryViewSet, basename="categories")
-router.register("genres", GenreViewSet, basename="genres")
-router.register('users', UserViewSet, basename='users')
+router.register(r"titles", TitleViewSet, basename="titles")
+router.register(r"categories", CategoryViewSet, basename="categories")
+router.register(r"genres", GenreViewSet, basename="genres")
+router.register(r'users', UserViewSet, basename='users')
 
 titles_router = routers.NestedSimpleRouter(router, r'titles', lookup='title')
 titles_router.register(r'reviews', ReviewsViewSet, basename='title-reviews')
@@ -19,7 +19,6 @@ reviews_router = routers.NestedSimpleRouter(titles_router, r'reviews', lookup='r
 reviews_router.register(r'comments', CommentsViewSet, basename='review-comments')
 
 urlpatterns = [
-    # path('v1/users/me/', UserMeView.as_view(), name='me'),
     path("v1/", include(router.urls)),
     path('v1/', include(titles_router.urls)),
     path('v1/', include(reviews_router.urls)),
