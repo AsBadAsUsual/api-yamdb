@@ -9,7 +9,7 @@ sys.path.append(project_path)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.settings')
 django.setup()
 
-from api.models import Title, Category, Genre, Review, Comment
+from reviews.models import Title, Category, Genre, Review, Comment
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -124,4 +124,9 @@ class Command(BaseCommand):
 
 if __name__ == '__main__':
     command = Command()
+    command.users()
+    command.category()
+    command.genre()
+    command.titles()
+    command.review()
     command.comments()

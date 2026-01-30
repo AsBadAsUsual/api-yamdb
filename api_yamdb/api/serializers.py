@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from django.core.validators import RegexValidator
 
-from management.models import Title, Category, Genre, Review, Comment
+from reviews.models import Title, Category, Genre, Review, Comment
 from users.models import CustomUser
 
 
