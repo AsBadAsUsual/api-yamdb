@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
-from users.models import CustomUser
+from users.models import User
 
 from .pagination import StandardResultsSetPagination
 from .permissions import IsAdmin, IsAdminOrModeratorOrAuthor, IsAdminOrReadOnly
@@ -38,8 +38,8 @@ class APIGetToken(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:
-            user = CustomUser.objects.get(username=data["username"])
-        except CustomUser.DoesNotExist:
+            user = User.objects.get(username=data["username"])
+        except User.DoesNotExist:
             return Response(
                 {"username": "Пользователь не найден!"},
                 status=status.HTTP_404_NOT_FOUND,
@@ -90,7 +90,7 @@ class APISignup(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = StandardResultsSetPagination
     lookup_field = "username"

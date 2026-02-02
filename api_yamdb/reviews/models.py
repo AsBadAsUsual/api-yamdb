@@ -1,12 +1,10 @@
 import datetime as dt
 
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
 from .constants import SYMBOLS_FOR_TEXT_FIELD
-
-User = get_user_model()
 
 
 def validate_year(value):
@@ -63,7 +61,9 @@ class Title(models.Model):
 
 class Review(models.Model):
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="Автор"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Автор"
     )
     text = models.TextField("Текс отзыва")
     score = models.PositiveSmallIntegerField(
@@ -90,7 +90,9 @@ class Review(models.Model):
 
 class Comment(models.Model):
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="Автор"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Автор"
     )
     text = models.TextField("Текс отзыва")
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
