@@ -71,15 +71,15 @@ class Command(BaseCommand):
         with open(path, "r", encoding="utf-8") as file:
             reader = csv.DictReader(file)
 
-            ThroughModel = Title.genre.through
+            through_model = Title.genre.through
 
             objs = [
-                ThroughModel(
+                through_model(
                     title_id=row["title_id"], genre_id=row["genre_id"]
                 )
                 for row in reader
             ]
-            ThroughModel.objects.bulk_create(objs, ignore_conflicts=True)
+            through_model.objects.bulk_create(objs, ignore_conflicts=True)
         print("Связи жанров и произведений загружены")
 
     def review(self, *args, **options):
