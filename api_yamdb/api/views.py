@@ -30,7 +30,8 @@ from .serializers import (
 class APIGetToken(APIView):
     """
     Получение JWT-токена при использовании username и confirmation code.
-    Доступно без токена.
+
+    Права доступа: Доступно без токена.
     """
 
     def post(self, request):
@@ -57,8 +58,10 @@ class APIGetToken(APIView):
 
 class APISignup(APIView):
     """
-    Получить код подтверждения на переданный email. Права доступа: Доступно без
-    токена. Поля email и username должны быть уникальными.
+    Получить код подтверждения на переданный email.
+    
+    Права доступа: Доступно без токена. Использовать имя 'me' в качестве
+    username запрещено. Поля email и username должны быть уникальными.
     """
 
     permission_classes = (AllowAny,)

@@ -5,6 +5,20 @@ from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+from users.constants import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
+
+
+class UsernameValidationMixin:
+    def validate_username(self, value):
+        if not re.match(r"^[\w.@+-]+\Z", value):
+            raise serializers.ValidationError(
+                "Недопустимые символы в username"
+            )
+        if len(value) > 150:
+            raise serializers.ValidationError("Username слишком длинный")
+        if value == "me":
+            raise serializers.ValidationError('Имя "me" запрещено')
+        return value
 
 
 class GetTokenSerializer(serializers.ModelSerializer):
@@ -16,7 +30,7 @@ class GetTokenSerializer(serializers.ModelSerializer):
         fields = ("username", "confirmation_code")
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(UsernameValidationMixin, serializers.ModelSerializer):
 
     class Meta:
         model = User
@@ -38,86 +52,48 @@ class UserSerializer(serializers.ModelSerializer):
             fields["role"].read_only = True
         return fields
 
-    def validate_username(self, value):
-        if not re.match(r"^[\w.@+-]+\Z", value):
-            raise serializers.ValidationError(
-                "Недопустимые символы в username"
-            )
-        if len(value) > 150:
-            raise serializers.ValidationError("Username слишком длинный")
-        if value == "me":
-            raise serializers.ValidationError('Имя "me" запрещено')
-        return value
 
+class SignUpSerializer(UsernameValidationMixin, serializers.Serializer):
 
-class SignUpSerializer(serializers.Serializer):
-
-    email = serializers.EmailField(required=True, max_length=254)
-    username = serializers.CharField(required=True, max_length=150)
-
-    def validate_username(self, value):
-        if not re.match(r"^[\w.@+-]+\Z", value):
-            raise serializers.ValidationError(
-                "Недопустимые символы в username"
-            )
-        if len(value) > 150:
-            raise serializers.ValidationError("Username слишком длинный")
-        if value == "me":
-            raise serializers.ValidationError('Имя "me" запрещено')
-        return value
+    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH,
+                                   required=True)
+    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH,
+                                     required=True)
 
     def validate(self, data):
         email = data.get("email")
         username = data.get("username")
 
-        try:
-            existing_user = User.objects.get(email=email)
-            if existing_user.username != username:
-                raise serializers.ValidationError(
-                    {
-                        "email": [
-                            "Пользователь с таким email уже зарегистрирован."
-                        ]
-                    }
-                )
-        except User.DoesNotExist:
-            pass
+        user_and_email = User.objects.filter(
+            email=email,
+            username=username
+        ).first()
 
-        try:
-            existing_user = User.objects.get(username=username)
-            if existing_user.email != email:
-                raise serializers.ValidationError(
-                    {"username": ["Этот username уже занят."]}
-                )
-        except User.DoesNotExist:
-            pass
+        if user_and_email:
+            return data
+
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError({
+                "email": ["Пользователь с таким email уже зарегистрирован."]
+            })
+
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError({
+                "username": ["Этот username уже занят."]
+            })
 
         return data
 
     def create(self, validated_data):
-        if "email" not in validated_data or "username" not in validated_data:
-            raise serializers.ValidationError(
-                {
-                    "email": ["Обязательное поле."],
-                    "username": ["Обязательное поле."],
-                }
-            )
-
         email = validated_data["email"]
         username = validated_data["username"]
 
-        try:
-            user = User.objects.get(email=email)
-            user.confirmation_code = default_token_generator.make_token(user)
-            user.save(update_fields=["confirmation_code"])
-            return user
-        except User.DoesNotExist:
-            user = User.objects.create(
-                username=username, email=email, is_active=False
-            )
-            user.set_unusable_password()
-            user.save()
-            return user
+        user, created = User.objects.get_or_create(
+            email=email,
+            username=username
+        )
+        user.confirmation_code = default_token_generator.make_token(user)
+        return user
 
 
 class CategorySerializer(serializers.ModelSerializer):
