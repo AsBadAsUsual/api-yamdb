@@ -4,7 +4,7 @@ import re
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title
-from users.models import CustomUser
+from users.models import User
 
 
 class GetTokenSerializer(serializers.ModelSerializer):
@@ -12,14 +12,14 @@ class GetTokenSerializer(serializers.ModelSerializer):
     confirmation_code = serializers.CharField(required=True)
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ("username", "confirmation_code")
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = (
             "username",
             "email",
@@ -71,7 +71,7 @@ class SignUpSerializer(serializers.Serializer):
         username = data.get("username")
 
         try:
-            existing_user = CustomUser.objects.get(email=email)
+            existing_user = User.objects.get(email=email)
             if existing_user.username != username:
                 raise serializers.ValidationError(
                     {
@@ -80,16 +80,16 @@ class SignUpSerializer(serializers.Serializer):
                         ]
                     }
                 )
-        except CustomUser.DoesNotExist:
+        except User.DoesNotExist:
             pass
 
         try:
-            existing_user = CustomUser.objects.get(username=username)
+            existing_user = User.objects.get(username=username)
             if existing_user.email != email:
                 raise serializers.ValidationError(
                     {"username": ["Этот username уже занят."]}
                 )
-        except CustomUser.DoesNotExist:
+        except User.DoesNotExist:
             pass
 
         return data
@@ -107,12 +107,12 @@ class SignUpSerializer(serializers.Serializer):
         username = validated_data["username"]
 
         try:
-            user = CustomUser.objects.get(email=email)
+            user = User.objects.get(email=email)
             user.confirmation_code = default_token_generator.make_token(user)
             user.save(update_fields=["confirmation_code"])
             return user
-        except CustomUser.DoesNotExist:
-            user = CustomUser.objects.create(
+        except User.DoesNotExist:
+            user = User.objects.create(
                 username=username, email=email, is_active=False
             )
             user.set_unusable_password()
