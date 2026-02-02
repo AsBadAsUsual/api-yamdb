@@ -1,0 +1,13 @@
+[tool.black]
+line-length = 79
+
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+select = ["E", "F", "I"]
+fix = true
+exclude = [
+    "migrations",
+    "venv",
+    "__pycache__",
+]

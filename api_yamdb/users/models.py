@@ -1,6 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.tokens import default_token_generator
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -8,34 +8,26 @@ from django.dispatch import receiver
 class CustomUser(AbstractUser):
     """Кастомная модель юзера."""
 
-    ADMIN = 'admin'
-    MODERATOR = 'moderator'
-    USER = 'user'
+    ADMIN = "admin"
+    MODERATOR = "moderator"
+    USER = "user"
 
-    ROLE_CHOISES = (
-        (ADMIN, 'admin'),
-        (MODERATOR, 'moderator'),
-        (USER, 'user')
-    )
+    ROLE_CHOISES = ((ADMIN, "admin"), (MODERATOR, "moderator"), (USER, "user"))
     username = models.CharField(max_length=150, unique=True, blank=False)
     email = models.EmailField(max_length=254, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     role = models.CharField(
-        'Роль',
+        "Роль",
         max_length=20,
         choices=ROLE_CHOISES,
         default=USER,
     )
-    bio = models.TextField('Биография', blank=True)
-    confirmation_code = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
+    bio = models.TextField("Биография", blank=True)
+    confirmation_code = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
-        unique_together = ('username', 'email')
+        unique_together = ("username", "email")
 
     def __str__(self):
         return self.username
