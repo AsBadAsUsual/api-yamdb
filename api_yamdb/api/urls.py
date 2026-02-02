@@ -13,13 +13,13 @@ from .views import (
     UserViewSet,
 )
 
-router = DefaultRouter()
-router.register(r"titles", TitleViewSet, basename="titles")
-router.register(r"categories", CategoryViewSet, basename="categories")
-router.register(r"genres", GenreViewSet, basename="genres")
-router.register(r"users", UserViewSet, basename="users")
+router_v1 = DefaultRouter()
+router_v1.register("titles", TitleViewSet, basename="titles")
+router_v1.register("categories", CategoryViewSet, basename="categories")
+router_v1.register("genres", GenreViewSet, basename="genres")
+router_v1.register("users", UserViewSet, basename="users")
 
-titles_router = routers.NestedSimpleRouter(router, r"titles", lookup="title")
+titles_router = routers.NestedSimpleRouter(router_v1, r"titles", lookup="title")
 titles_router.register(r"reviews", ReviewsViewSet, basename="title-reviews")
 
 reviews_router = routers.NestedSimpleRouter(
@@ -29,10 +29,15 @@ reviews_router.register(
     r"comments", CommentsViewSet, basename="review-comments"
 )
 
-urlpatterns = [
-    path("v1/", include(router.urls)),
-    path("v1/", include(titles_router.urls)),
-    path("v1/", include(reviews_router.urls)),
-    path("v1/auth/token/", APIGetToken.as_view(), name="get_token"),
-    path("v1/auth/signup/", APISignup.as_view(), name="signup"),
+urlpatterns_v1 = [
+    path("auth/token/", APIGetToken.as_view(), name="get_token"),
+    path("auth/signup/", APISignup.as_view(), name="signup"),
+    path("", include(router_v1.urls)),
+    path("", include(titles_router.urls)),
+    path("", include(reviews_router.urls)),
 ]
+
+urlpatterns = [
+    path("v1/", include(urlpatterns_v1))
+]
+
