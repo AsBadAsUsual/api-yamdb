@@ -22,7 +22,6 @@ class DefaultUserAdmin(UserAdmin):
         "email",
     )
     ordering = ("id",)
-    readonly_fields = ("confirmation_code",)
     list_filter = (
         "role",
         "is_staff",

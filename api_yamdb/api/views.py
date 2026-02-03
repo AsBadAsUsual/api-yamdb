@@ -1,6 +1,8 @@
-from django.core.mail import EmailMessage
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -8,13 +10,11 @@ from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-
 from .filters import TitleFilter
 from .pagination import StandardResultsSetPagination
 from .permissions import IsAdmin, IsAdminOrModeratorOrAuthor, IsAdminOrReadOnly
@@ -37,25 +37,15 @@ class APIGetToken(APIView):
     Права доступа: Доступно без токена.
     """
 
+    permission_classes = (AllowAny,)
+
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
-        try:
-            user = User.objects.get(username=data["username"])
-        except User.DoesNotExist:
-            return Response(
-                {"username": "Пользователь не найден!"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        if data.get("confirmation_code") == user.confirmation_code:
-            token = RefreshToken.for_user(user).access_token
-            return Response(
-                {"token": str(token)}, status=status.HTTP_201_CREATED
-            )
+
         return Response(
-            {"confirmation_code": "Неверный код подтверждения!"},
-            status=status.HTTP_400_BAD_REQUEST,
+            serializer.validated_data,
+            status=status.HTTP_200_OK,
         )
 
 
@@ -69,29 +59,25 @@ class APISignup(APIView):
 
     permission_classes = (AllowAny,)
 
-    @staticmethod
-    def send_email(data):
-        email = EmailMessage(
-            subject=data["email_subject"],
-            body=data["email_body"],
-            to=[data["to_email"]],
-        )
-        email.send()
-
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        user, _ = User.objects.get_or_create(
+            username=serializer.validated_data["username"],
+            email=serializer.validated_data["email"],
+        )
+        confirmation_code = default_token_generator.make_token(user)
         email_body = (
             f"Приветствую, {user.username}."
-            f"\nКод подтверждения для доступа к API: {user.confirmation_code}"
+            f"\nКод подтверждения для доступа к API: {confirmation_code}"
         )
-        data = {
-            "email_body": email_body,
-            "to_email": user.email,
-            "email_subject": "Код подтверждения для доступа к API!",
-        }
-        self.send_email(data)
+
+        send_mail(
+            subject="Код подтверждения для API Yamdb",
+            message=email_body,
+            from_email=None,
+            recipient_list=[user.email],
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -136,9 +122,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     /id/ Получение, удаление, изменение конкретного произведения
     """
 
-    queryset = Title.objects.annotate(
-        rating=Avg("reviews__score")
-    ).order_by("name")
+    queryset = Title.objects.annotate(rating=Avg("reviews__score")).order_by(
+        "name"
+    )
 
     serializer_class = TitleWriteSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -215,7 +201,7 @@ class CommentsViewSet(BaseCommentReviewViewSet):
         return get_object_or_404(
             Review,
             pk=self.kwargs.get("review_pk"),
-            title_id=self.kwargs.get("title_pk")
+            title_id=self.kwargs.get("title_pk"),
         )
 
     def get_queryset(self):

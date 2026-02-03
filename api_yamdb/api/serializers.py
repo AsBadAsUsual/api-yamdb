@@ -4,6 +4,9 @@ import re
 from django.contrib.auth.tokens import default_token_generator
 from django.db.models import Avg
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
+from rest_framework_simplejwt.tokens import AccessToken
+
 from reviews.constants import (
     EMAIL_MAX_LENGTH,
     FORBIDDEN_USERNAME,
@@ -29,13 +32,22 @@ class UsernameValidationMixin:
         return value
 
 
-class GetTokenSerializer(serializers.ModelSerializer):
+class GetTokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
-    class Meta:
-        model = User
-        fields = ("username", "confirmation_code")
+    def validate(self, data):
+        try:
+            user = User.objects.get(username=data["username"])
+        except User.DoesNotExist:
+            raise NotFound("Пользователь не найден")
+
+        if not default_token_generator.check_token(
+            user, data["confirmation_code"]
+        ):
+            raise serializers.ValidationError("Неверный код подтверждения!")
+
+        return {"token": str(AccessToken.for_user(user))}
 
 
 class UserSerializer(UsernameValidationMixin, serializers.ModelSerializer):
@@ -91,16 +103,6 @@ class SignUpSerializer(UsernameValidationMixin, serializers.Serializer):
 
         return data
 
-    def create(self, validated_data):
-        email = validated_data["email"]
-        username = validated_data["username"]
-
-        user, created = User.objects.get_or_create(
-            email=email, username=username
-        )
-        user.confirmation_code = default_token_generator.make_token(user)
-        return user
-
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -132,7 +134,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
         )
 
     def get_rating(self, obj):
-        total_rating = obj.reviews.aggregate(Avg('score'))['score__avg']
+        total_rating = obj.reviews.aggregate(Avg("score"))["score__avg"]
         if total_rating is not None:
             return round(total_rating, 1)
         return None
@@ -141,8 +143,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 class TitleWriteSerializer(serializers.ModelSerializer):
     year = serializers.IntegerField()
     category = serializers.SlugRelatedField(
-        slug_field="slug",
-        queryset=Category.objects.all()
+        slug_field="slug", queryset=Category.objects.all()
     )
     genre = serializers.SlugRelatedField(
         slug_field="slug",

@@ -1,10 +1,7 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.tokens import default_token_generator
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
 from reviews.constants import (
-    CODE_MAX_LENGTH,
     EMAIL_MAX_LENGTH,
     NAME_MAX_LENGTH,
     ROLE_MAX_LENGTH,
@@ -41,9 +38,6 @@ class User(AbstractUser):
         default=USER,
     )
     bio = models.TextField("Биография", blank=True)
-    confirmation_code = models.CharField(
-        max_length=CODE_MAX_LENGTH, blank=True, null=True
-    )
 
     class Meta:
         ordering = [
@@ -62,13 +56,3 @@ class User(AbstractUser):
     @property
     def is_moderator(self):
         return self.role == self.MODERATOR
-
-
-@receiver(post_save, sender=User)
-def set_confirmation_code(sender, instance, created, **kwargs):
-    if created:
-        confirmation_code = default_token_generator.make_token(instance)
-        User.objects.filter(pk=instance.pk).update(
-            confirmation_code=confirmation_code
-        )
-        instance.confirmation_code = confirmation_code

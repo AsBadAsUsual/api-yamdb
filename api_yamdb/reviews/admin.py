@@ -64,6 +64,6 @@ class TitleAdmin(admin.ModelAdmin):
     ordering = ("name",)
     search_fields = ("name", "year")
 
-    @admin.display(description='Жанры')
+    @admin.display(description="Жанры")
     def get_genres(self, obj):
         return ", ".join([genre.name for genre in obj.genre.all()])
