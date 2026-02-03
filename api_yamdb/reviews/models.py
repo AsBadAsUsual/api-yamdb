@@ -1,36 +1,39 @@
 import datetime as dt
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models
 
 from .constants import SYMBOLS_FOR_TEXT_FIELD
+from .validators import validate_year, validate_score
 
 
-def validate_year(value):
-    if value > dt.date.today().year:
-        raise ValidationError("Нельзя добавлять произведения будущего!")
+class CategoryGenreBase(models.Model):
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        abstract = True
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 
-def validate_score(value):
-    if value < 1 or value > 10:
-        raise ValidationError("Оценка должна быть от 1 до 10")
-
-
-class Category(models.Model):
+class Category(CategoryGenreBase):
     name = models.CharField("Название категории", max_length=100)
     slug = models.SlugField("Слаг категории", unique=True)
 
-    def __str__(self):
-        return self.name
+    class Meta(CategoryGenreBase.Meta):
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
-class Genre(models.Model):
+class Genre(CategoryGenreBase):
     name = models.CharField("Название жанра", max_length=100)
     slug = models.SlugField("Слаг жанра", unique=True)
 
-    def __str__(self):
-        return self.name
+    class Meta(CategoryGenreBase.Meta):
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Title(models.Model):

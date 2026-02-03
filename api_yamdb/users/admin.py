@@ -32,11 +32,11 @@ class DefaultUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ('Дополнительная информация', {
             'fields': ('bio', 'role')
-        })
+        }),
     )
 
     add_fieldsets = UserAdmin.add_fieldsets + (
         ('Дополнительная информация', {
             'fields': ('bio', 'role')
-        })
+        }),
     )

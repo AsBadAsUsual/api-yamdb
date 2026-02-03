@@ -54,6 +54,7 @@ python manage.py runserver
 ```
 ## Использование API
 Регистрация пользователя
+
 ```POST /api/v1/auth/signup/```
 
 Параметры:
@@ -81,6 +82,7 @@ python manage.py runserver
 Пользовательский профиль
 
 ```GET /api/v1/users/me/``` — получить данные
+
 ```PATCH /api/v1/users/me/``` — изменить данные
 
 Пример cURL:
@@ -89,12 +91,12 @@ python manage.py runserver
 
 Управление пользователями (Администратор)
 ```
-Метод	URL	Описание
-GET	/api/v1/users/	Список всех пользователей
-POST	/api/v1/users/	Создать пользователя
-GET	/api/v1/users/<username>/	Получить пользователя
-PATCH	/api/v1/users/<username>/	Изменить пользователя
-DELETE	/api/v1/users/<username>/	Удалить пользователя
+Метод	   URL	                      Описание
+GET	    /api/v1/users/	            Список всех пользователей
+POST	  /api/v1/users/	            Создать пользователя
+GET	    /api/v1/users/<username>/	  Получить пользователя
+PATCH	  /api/v1/users/<username>/	  Изменить пользователя
+DELETE  /api/v1/users/<username>/	  Удалить пользователя
 ```
 
 Пример запроса создания:
@@ -113,12 +115,12 @@ DELETE	/api/v1/users/<username>/	Удалить пользователя
 
 Titles (Произведения)
 ```
-Метод	URL	Описание
-GET	/api/v1/titles/	Список всех произведений
-POST	/api/v1/titles/	Создать произведение
-GET	/api/v1/titles/<id>/	Получить произведение
-PATCH	/api/v1/titles/<id>/	Изменить произведение
-DELETE	/api/v1/titles/<id>/	Удалить произведение
+Метод	   URL	                 Описание
+GET	    /api/v1/titles/	       Список всех произведений
+POST	  /api/v1/titles/	       Создать произведение
+GET	    /api/v1/titles/<id>/	 Получить произведение
+PATCH	  /api/v1/titles/<id>/	 Изменить произведение
+DELETE  /api/v1/titles/<id>/	 Удалить произведение
 ```
 
 Пример создания:
@@ -135,11 +137,11 @@ DELETE	/api/v1/titles/<id>/	Удалить произведение
 
 Reviews (Отзывы)
 ```
-Метод	URL	Описание
-GET	/api/v1/titles/<title_id>/reviews/	Список отзывов по произведению
-POST	/api/v1/titles/<title_id>/reviews/	Создать отзыв
-GET	/api/v1/titles/<title_id>/reviews/<review_id>/	Получить отзыв
-PATCH	/api/v1/titles/<title_id>/reviews/<review_id>/	Изменить отзыв
+Метод	   URL	                                          Описание
+GET	    /api/v1/titles/<title_id>/reviews/	            Список отзывов по произведению
+POST	  /api/v1/titles/<title_id>/reviews/	            Создать отзыв
+GET	    /api/v1/titles/<title_id>/reviews/<review_id>/	Получить отзыв
+PATCH	  /api/v1/titles/<title_id>/reviews/<review_id>/	Изменить отзыв
 DELETE	/api/v1/titles/<title_id>/reviews/<review_id>/	Удалить отзыв
 ```
 
@@ -155,11 +157,11 @@ DELETE	/api/v1/titles/<title_id>/reviews/<review_id>/	Удалить отзыв
 
 Comments (Комментарии)
 ```
-Метод	URL	Описание
-GET	/api/v1/titles/<title_id>/reviews/<review_id>/comments/	Список комментариев к отзыву
-POST	/api/v1/titles/<title_id>/reviews/<review_id>/comments/	Создать комментарий
-GET	/api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Получить комментарий
-PATCH	/api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Изменить комментарий
+Метод	   URL	                                                                Описание
+GET	    /api/v1/titles/<title_id>/reviews/<review_id>/comments/	              Список комментариев к отзыву
+POST	  /api/v1/titles/<title_id>/reviews/<review_id>/comments/	              Создать комментарий
+GET	    /api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Получить комментарий
+PATCH	  /api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Изменить комментарий
 DELETE	/api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Удалить комментарий
 ```
 
@@ -174,13 +176,13 @@ DELETE	/api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Уд
 
 Categories (Категории) и Genres (Жанры)
 ```
-Метод	URL	Описание
-GET	/api/v1/categories/	Список категорий
-POST	/api/v1/categories/	Создать категорию (админ)
+Метод	   URL	                      Описание
+GET	    /api/v1/categories/	        Список категорий
+POST	  /api/v1/categories/	        Создать категорию (админ)
 DELETE	/api/v1/categories/<slug>/	Удалить категорию (админ)
-GET	/api/v1/genres/	Список жанров
-POST	/api/v1/genres/	Создать жанр (админ)
-DELETE	/api/v1/genres/<slug>/	Удалить жанр (админ)
+GET	    /api/v1/genres/	            Список жанров
+POST	  /api/v1/genres/	            Создать жанр (админ)
+DELETE	/api/v1/genres/<slug>/	    Удалить жанр (админ)
 ```
 
 Пример:
@@ -193,15 +195,15 @@ DELETE	/api/v1/genres/<slug>/	Удалить жанр (админ)
 ```
 
 ## Роли пользователей
-Аноним (Anonymous) — просмотр произведений и отзывов
+**Аноним** (Anonymous) — просмотр произведений и отзывов
 
-Аутентифицированный пользователь — публикация отзывов, оценка произведений, редактирование своих данных
+**Аутентифицированный пользователь** — публикация отзывов, оценка произведений, редактирование своих данных
 
-Модератор — редактирование/удаление любых отзывов и комментариев
+**Модератор** — редактирование/удаление любых отзывов и комментариев
 
-Администратор — полный доступ к проекту, управление пользователями, категориями и жанрами
+**Администратор** — полный доступ к проекту, управление пользователями, категориями и жанрами
 
-Суперпользователь Django — всегда администратор
+**Суперпользователь Django** — всегда администратор
 
 ## Структура проекта
 ```
@@ -217,4 +219,4 @@ api-yamdb/
 ├── .env
 ```
 
-# Над проектом работали: Селиванов Александр, Карпухин Тихон, Пономарёв Александр
+###### Над проектом работали: Селиванов Александр, Карпухин Тихон, Пономарёв Александр
