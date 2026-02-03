@@ -2,6 +2,7 @@ import datetime as dt
 import re
 
 from django.contrib.auth.tokens import default_token_generator
+from django.db.models import Avg
 from rest_framework import serializers
 from reviews.constants import (
     EMAIL_MAX_LENGTH,
@@ -116,7 +117,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
@@ -130,13 +131,23 @@ class TitleReadSerializer(serializers.ModelSerializer):
             "category",
         )
 
+    def get_rating(self, obj):
+        total_rating = obj.reviews.aggregate(Avg('score'))['score__avg']
+        if total_rating is not None:
+            return round(total_rating, 1)
+        return None
+
 
 class TitleWriteSerializer(serializers.ModelSerializer):
+    year = serializers.IntegerField()
     category = serializers.SlugRelatedField(
-        slug_field="slug", queryset=Category.objects.all()
+        slug_field="slug",
+        queryset=Category.objects.all()
     )
     genre = serializers.SlugRelatedField(
-        slug_field="slug", queryset=Genre.objects.all(), many=True
+        slug_field="slug",
+        queryset=Genre.objects.all(),
+        many=True,
     )
 
     class Meta:
@@ -150,6 +161,17 @@ class TitleWriteSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate_genre(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                "Произведение должно иметь хотя бы один жанр."
+            )
+        return value
+
+    def to_representation(self, instance):
+        serializer = TitleReadSerializer(instance)
+        return serializer.data
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -159,7 +181,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ("id", "text", "author", "score", "pub_date")
-        read_only_fields = ("author", "pub_date")
 
     def validate(self, data):
         request = self.context.get("request")
@@ -167,9 +188,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             return data
 
         user = request.user
-        if not user or user.is_anonymous:
-            return data
-
         title_id = self.context["view"].kwargs.get("title_pk")
         if Review.objects.filter(author=user, title_id=title_id).exists():
             raise serializers.ValidationError(
@@ -187,4 +205,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ("id", "text", "author", "pub_date")
-        read_only_fields = ("author", "pub_date")
