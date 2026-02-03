@@ -3,6 +3,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from .constants import CODE_MAX_LENGTH, EMAIL_MAX_LENGTH, NAME_MAX_LENGTH, ROLE_MAX_LENGTH, USERNAME_MAX_LENGTH
 
 
 class User(AbstractUser):
@@ -13,22 +14,22 @@ class User(AbstractUser):
     USER = "user"
 
     ROLE_CHOISES = ((ADMIN, "admin"), (MODERATOR, "moderator"), (USER, "user"))
-    username = models.CharField(max_length=150,
+    username = models.CharField(max_length=USERNAME_MAX_LENGTH,
                                 unique=True, verbose_name='Ник пользователя')
-    email = models.EmailField(max_length=254,
+    email = models.EmailField(max_length=EMAIL_MAX_LENGTH,
                               unique=True, verbose_name='Email')
-    first_name = models.CharField(max_length=150,
+    first_name = models.CharField(max_length=NAME_MAX_LENGTH,
                                   blank=True, verbose_name='Имя')
-    last_name = models.CharField(max_length=150,
+    last_name = models.CharField(max_length=NAME_MAX_LENGTH,
                                  blank=True, verbose_name='Фамилия')
     role = models.CharField(
         "Роль",
-        max_length=20,
+        max_length=ROLE_MAX_LENGTH,
         choices=ROLE_CHOISES,
         default=USER,
     )
     bio = models.TextField("Биография", blank=True)
-    confirmation_code = models.CharField(max_length=255, blank=True, null=True)
+    confirmation_code = models.CharField(max_length=CODE_MAX_LENGTH, blank=True, null=True)
 
     class Meta:
         ordering = ['username',]
