@@ -3,21 +3,28 @@ import re
 
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
+from reviews.constants import (
+    EMAIL_MAX_LENGTH,
+    FORBIDDEN_USERNAME,
+    USERNAME_MAX_LENGTH,
+    USERNAME_REGEX,
+)
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from users.constants import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 
 
 class UsernameValidationMixin:
     def validate_username(self, value):
-        if not re.match(r"^[\w.@+-]+\Z", value):
+        if not re.match(USERNAME_REGEX, value):
             raise serializers.ValidationError(
                 "Недопустимые символы в username"
             )
-        if len(value) > 150:
+        if len(value) > USERNAME_MAX_LENGTH:
             raise serializers.ValidationError("Username слишком длинный")
-        if value == "me":
-            raise serializers.ValidationError('Имя "me" запрещено')
+        if value == FORBIDDEN_USERNAME:
+            raise serializers.ValidationError(
+                f"Имя {FORBIDDEN_USERNAME} запрещено"
+            )
         return value
 
 
@@ -55,32 +62,31 @@ class UserSerializer(UsernameValidationMixin, serializers.ModelSerializer):
 
 class SignUpSerializer(UsernameValidationMixin, serializers.Serializer):
 
-    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH,
-                                   required=True)
-    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH,
-                                     required=True)
+    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH, required=True)
+    username = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH, required=True
+    )
 
     def validate(self, data):
         email = data.get("email")
         username = data.get("username")
 
         user_and_email = User.objects.filter(
-            email=email,
-            username=username
+            email=email, username=username
         ).first()
 
         if user_and_email:
             return data
 
         if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError({
-                "email": ["Пользователь с таким email уже зарегистрирован."]
-            })
+            raise serializers.ValidationError(
+                {"email": ["Пользователь с таким email уже зарегистрирован."]}
+            )
 
         if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError({
-                "username": ["Этот username уже занят."]
-            })
+            raise serializers.ValidationError(
+                {"username": ["Этот username уже занят."]}
+            )
 
         return data
 
@@ -89,8 +95,7 @@ class SignUpSerializer(UsernameValidationMixin, serializers.Serializer):
         username = validated_data["username"]
 
         user, created = User.objects.get_or_create(
-            email=email,
-            username=username
+            email=email, username=username
         )
         user.confirmation_code = default_token_generator.make_token(user)
         return user

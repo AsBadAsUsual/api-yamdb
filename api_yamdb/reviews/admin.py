@@ -18,7 +18,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class CommentAdmin(admin.ModelAdmin):
     list_display = ("id", "author", "text", "pub_date", "review")
     ordering = ("-pub_date",)
-    search_fields = ("author", "review", "pub_date")
+    search_fields = ("author__username", "review__text", "pub_date")
 
 
 @admin.register(Genre)
@@ -44,10 +44,10 @@ class ReviewAdmin(admin.ModelAdmin):
     )
     ordering = ("-pub_date",)
     search_fields = (
-        "author",
+        "author__username",
         "score",
         "pub_date",
-        "title",
+        "title__text",
     )
 
 

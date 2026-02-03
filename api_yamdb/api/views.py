@@ -3,9 +3,11 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (AllowAny,
-                                        IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -59,7 +61,7 @@ class APIGetToken(APIView):
 class APISignup(APIView):
     """
     Получить код подтверждения на переданный email.
-    
+
     Права доступа: Доступно без токена. Использовать имя 'me' в качестве
     username запрещено. Поля email и username должны быть уникальными.
     """
@@ -209,8 +211,10 @@ class ReviewsViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     serializer_class = ReviewSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = (IsAdminOrModeratorOrAuthor,
-                          IsAuthenticatedOrReadOnly)
+    permission_classes = (
+        IsAdminOrModeratorOrAuthor,
+        IsAuthenticatedOrReadOnly,
+    )
 
     def get_queryset(self):
         new_queryset = Review.objects.filter(title=self.kwargs.get("title_pk"))
@@ -229,8 +233,10 @@ class CommentsViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     serializer_class = CommentSerializer
     pagination_class = StandardResultsSetPagination
-    permission_classes = (IsAdminOrModeratorOrAuthor,
-                          IsAuthenticatedOrReadOnly)
+    permission_classes = (
+        IsAdminOrModeratorOrAuthor,
+        IsAuthenticatedOrReadOnly,
+    )
 
     def get_queryset(self):
         review = get_object_or_404(

@@ -1,42 +1,57 @@
-import datetime as dt
-
 from django.conf import settings
 from django.db import models
 
 from .constants import SYMBOLS_FOR_TEXT_FIELD
-from .validators import validate_year, validate_score
+from .validators import validate_score, validate_year
 
 
-class CategoryGenreBase(models.Model):
+class CategoryGenreTitleBase(models.Model):
     name = models.CharField(max_length=100)
 
     class Meta:
         abstract = True
-        ordering = ['name']
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
 
 
-class Category(CategoryGenreBase):
+class CommentReviewBase(models.Model):
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name="Автор",
+    )
+    text = models.TextField("Текс отзыва")
+    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["-pub_date"]
+
+    def __str__(self):
+        return self.text[:SYMBOLS_FOR_TEXT_FIELD]
+
+
+class Category(CategoryGenreTitleBase):
     name = models.CharField("Название категории", max_length=100)
     slug = models.SlugField("Слаг категории", unique=True)
 
-    class Meta(CategoryGenreBase.Meta):
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
+    class Meta(CategoryGenreTitleBase.Meta):
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
 
 
-class Genre(CategoryGenreBase):
+class Genre(CategoryGenreTitleBase):
     name = models.CharField("Название жанра", max_length=100)
     slug = models.SlugField("Слаг жанра", unique=True)
 
-    class Meta(CategoryGenreBase.Meta):
-        verbose_name = 'Жанр'
-        verbose_name_plural = 'Жанры'
+    class Meta(CategoryGenreTitleBase.Meta):
+        verbose_name = "Жанр"
+        verbose_name_plural = "Жанры"
 
 
-class Title(models.Model):
+class Title(CategoryGenreTitleBase):
     name = models.CharField("Название", max_length=100)
     year = models.PositiveSmallIntegerField(
         validators=[validate_year],
@@ -54,58 +69,40 @@ class Title(models.Model):
     )
     description = models.TextField("Описание произведения")
 
-    class Meta:
-        ordering = ["name"]
+    class Meta(CategoryGenreTitleBase.Meta):
         default_related_name = "titles"
+        verbose_name = "Произведение"
+        verbose_name_plural = "Произведения"
 
-    def __str__(self):
-        return self.name
 
+class Review(CommentReviewBase):
 
-class Review(models.Model):
-    author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        verbose_name="Автор"
-    )
-    text = models.TextField("Текс отзыва")
     score = models.PositiveSmallIntegerField(
         validators=[validate_score],
         verbose_name="Оценка",
     )
-    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, verbose_name="Публикация"
     )
 
-    class Meta:
+    class Meta(CommentReviewBase.Meta):
         default_related_name = "reviews"
-        ordering = ["-pub_date"]
         constraints = [
             models.UniqueConstraint(
                 fields=["author", "title"], name="unique_review"
             )
         ]
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
 
-    def __str__(self):
-        return self.text[:SYMBOLS_FOR_TEXT_FIELD]
 
+class Comment(CommentReviewBase):
 
-class Comment(models.Model):
-    author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        verbose_name="Автор"
-    )
-    text = models.TextField("Текс отзыва")
-    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, verbose_name="Отзыв"
     )
 
-    class Meta:
+    class Meta(CommentReviewBase.Meta):
         default_related_name = "comments"
-        ordering = ["-pub_date"]
-
-    def __str__(self):
-        return self.text[:SYMBOLS_FOR_TEXT_FIELD]
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"

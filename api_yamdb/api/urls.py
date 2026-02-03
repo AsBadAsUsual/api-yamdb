@@ -19,7 +19,9 @@ router_v1.register("categories", CategoryViewSet, basename="categories")
 router_v1.register("genres", GenreViewSet, basename="genres")
 router_v1.register("users", UserViewSet, basename="users")
 
-titles_router = routers.NestedSimpleRouter(router_v1, r"titles", lookup="title")
+titles_router = routers.NestedSimpleRouter(
+    router_v1, r"titles", lookup="title"
+)
 titles_router.register(r"reviews", ReviewsViewSet, basename="title-reviews")
 
 reviews_router = routers.NestedSimpleRouter(
@@ -37,7 +39,4 @@ urlpatterns_v1 = [
     path("", include(reviews_router.urls)),
 ]
 
-urlpatterns = [
-    path("v1/", include(urlpatterns_v1))
-]
-
+urlpatterns = [path("v1/", include(urlpatterns_v1))]

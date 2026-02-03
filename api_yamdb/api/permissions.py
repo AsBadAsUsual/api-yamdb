@@ -5,8 +5,9 @@ class IsAdminOrReadOnly(BasePermission):
     """Пермишн даёт доступ не для чтения только админу"""
 
     def has_permission(self, request, view):
-        return (request.method in SAFE_METHODS
-                or (request.user.is_authenticated and request.user.is_admin))
+        return request.method in SAFE_METHODS or (
+            request.user.is_authenticated and request.user.is_admin
+        )
 
 
 class IsAdminOrModeratorOrAuthor(BasePermission):
