@@ -1,6 +1,7 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
+from django.db.models.functions import Round
 from rest_framework_simplejwt.tokens import AccessToken
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -127,9 +128,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     /id/ Получение, удаление, изменение конкретного произведения
     """
 
-    queryset = Title.objects.annotate(rating=Avg("reviews__score")).order_by(
-        "name"
-    )
+    queryset = Title.objects.annotate(
+        rating=Round(Avg("reviews__score"), 1)
+    ).order_by("name")
 
     serializer_class = TitleWriteSerializer
     filter_backends = (DjangoFilterBackend,)
