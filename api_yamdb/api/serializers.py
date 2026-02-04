@@ -3,6 +3,7 @@ import re
 
 from django.contrib.auth.tokens import default_token_generator
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework_simplejwt.tokens import AccessToken
@@ -23,13 +24,34 @@ class UsernameValidationMixin:
             raise serializers.ValidationError(
                 "Недопустимые символы в username"
             )
-        if len(value) > USERNAME_MAX_LENGTH:
-            raise serializers.ValidationError("Username слишком длинный")
         if value == FORBIDDEN_USERNAME:
             raise serializers.ValidationError(
                 f"Имя {FORBIDDEN_USERNAME} запрещено"
             )
         return value
+    
+    def validate(self, data):
+        email = data.get("email")
+        username = data.get("username")
+
+        user_and_email = User.objects.filter(
+            email=email, username=username
+        ).exists()
+
+        if user_and_email:
+            return data
+
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError(
+                {"email": ["Пользователь с таким email уже зарегистрирован."]}
+            )
+
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError(
+                {"username": ["Этот username уже занят."]}
+            )
+
+        return data
 
 
 class GetTokenSerializer(serializers.Serializer):
@@ -37,20 +59,23 @@ class GetTokenSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(required=True)
 
     def validate(self, data):
-        try:
-            user = User.objects.get(username=data["username"])
-        except User.DoesNotExist:
-            raise NotFound("Пользователь не найден")
+        user = get_object_or_404(User, username=data['username'])
 
         if not default_token_generator.check_token(
             user, data["confirmation_code"]
         ):
             raise serializers.ValidationError("Неверный код подтверждения!")
+        
+        data['user'] = user
 
-        return {"token": str(AccessToken.for_user(user))}
+        return data
 
 
 class UserSerializer(UsernameValidationMixin, serializers.ModelSerializer):
+
+    username = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH, required=True
+    )
 
     class Meta:
         model = User
@@ -79,29 +104,6 @@ class SignUpSerializer(UsernameValidationMixin, serializers.Serializer):
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH, required=True
     )
-
-    def validate(self, data):
-        email = data.get("email")
-        username = data.get("username")
-
-        user_and_email = User.objects.filter(
-            email=email, username=username
-        ).first()
-
-        if user_and_email:
-            return data
-
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError(
-                {"email": ["Пользователь с таким email уже зарегистрирован."]}
-            )
-
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError(
-                {"username": ["Этот username уже занят."]}
-            )
-
-        return data
 
 
 class CategorySerializer(serializers.ModelSerializer):

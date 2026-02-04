@@ -91,12 +91,13 @@ python manage.py runserver
 
 Управление пользователями (Администратор)
 ```
-Метод	   URL	                      Описание
-GET	    /api/v1/users/	            Список всех пользователей
-POST	  /api/v1/users/	            Создать пользователя
-GET	    /api/v1/users/<username>/	  Получить пользователя
-PATCH	  /api/v1/users/<username>/	  Изменить пользователя
-DELETE  /api/v1/users/<username>/	  Удалить пользователя
+| Метод | URL | Описание |
+|-------|-----|----------|
+| GET |/api/v1/users/ |Список всех пользователей |
+| POST |/api/v1/users/ |Создать пользователя |
+| GET |/api/v1/users/<username>/ | Получить пользователя |
+| PATCH |/api/v1/users/<username>/ | Изменить пользователя |
+| DELETE |/api/v1/users/<username>/ | Удалить пользователя |
 ```
 
 Пример запроса создания:

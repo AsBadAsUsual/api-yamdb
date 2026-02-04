@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 
-from .views import (
+from api.views import (
     APIGetToken,
     APISignup,
     CategoryViewSet,
@@ -31,9 +31,13 @@ reviews_router.register(
     r"comments", CommentsViewSet, basename="review-comments"
 )
 
+urlpatterns_auth = [
+    path("token/", APIGetToken.as_view(), name="get_token"),
+    path("signup/", APISignup.as_view(), name="signup"),
+]
+
 urlpatterns_v1 = [
-    path("auth/token/", APIGetToken.as_view(), name="get_token"),
-    path("auth/signup/", APISignup.as_view(), name="signup"),
+    path("auth/", include(urlpatterns_auth)),
     path("", include(router_v1.urls)),
     path("", include(titles_router.urls)),
     path("", include(reviews_router.urls)),

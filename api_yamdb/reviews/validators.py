@@ -2,7 +2,7 @@ import datetime as dt
 
 from django.core.exceptions import ValidationError
 
-from .constants import MAX_SCORE, MIN_SCORE
+from reviews.constants import MAX_SCORE, MIN_SCORE
 
 
 def validate_year(value):

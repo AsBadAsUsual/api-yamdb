@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.db import models
 
-from .constants import SYMBOLS_FOR_TEXT_FIELD
-from .validators import validate_score, validate_year
+from reviews.constants import NAME_MAX_LENGTH, SYMBOLS_FOR_TEXT_FIELD
+from reviews.validators import validate_score, validate_year
 
 
-class CategoryGenreTitleBase(models.Model):
-    name = models.CharField(max_length=100)
+class CategoryGenreBase(models.Model):
+    name = models.CharField('Название', max_length=NAME_MAX_LENGTH)
+    slug = models.SlugField("Слаг", unique=True)
 
     class Meta:
         abstract = True
@@ -33,27 +34,23 @@ class CommentReviewBase(models.Model):
         return self.text[:SYMBOLS_FOR_TEXT_FIELD]
 
 
-class Category(CategoryGenreTitleBase):
-    name = models.CharField("Название категории", max_length=100)
-    slug = models.SlugField("Слаг категории", unique=True)
+class Category(CategoryGenreBase):
 
-    class Meta(CategoryGenreTitleBase.Meta):
+    class Meta(CategoryGenreBase.Meta):
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
 
-class Genre(CategoryGenreTitleBase):
-    name = models.CharField("Название жанра", max_length=100)
-    slug = models.SlugField("Слаг жанра", unique=True)
+class Genre(CategoryGenreBase):
 
-    class Meta(CategoryGenreTitleBase.Meta):
+    class Meta(CategoryGenreBase.Meta):
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
 
 
-class Title(CategoryGenreTitleBase):
-    name = models.CharField("Название", max_length=100)
-    year = models.PositiveSmallIntegerField(
+class Title(models.Model):
+    name = models.CharField("Название", max_length=NAME_MAX_LENGTH)
+    year = models.SmallIntegerField(
         validators=[validate_year],
         verbose_name="Год выпуска",
     )
@@ -69,10 +66,14 @@ class Title(CategoryGenreTitleBase):
     )
     description = models.TextField("Описание произведения")
 
-    class Meta(CategoryGenreTitleBase.Meta):
+    class Meta:
+        ordering = ["name"]
         default_related_name = "titles"
         verbose_name = "Произведение"
         verbose_name_plural = "Произведения"
+
+    def __str__(self):
+        return self.name
 
 
 class Review(CommentReviewBase):
