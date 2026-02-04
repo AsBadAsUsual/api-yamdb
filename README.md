@@ -65,7 +65,15 @@ python manage.py runserver
   "username": "user123"
 }
 ```
-В ответ придёт confirmation_code на email.
+
+Ответ(200 OK)
+```
+{
+  "username": "alex",
+  "email": "alex@example.com"
+}
+```
+После этого на имейл приходит код подтверждения.
 
 Получение токена
 ```POST /api/v1/auth/token/```
@@ -77,7 +85,12 @@ python manage.py runserver
   "confirmation_code": "123456"
 }
 ```
-В ответ JWT-токен.
+Ответ:
+```
+{
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+```
 
 Пользовательский профиль
 
@@ -90,19 +103,19 @@ python manage.py runserver
 ```curl -H "Authorization: Bearer <token>" http://localhost:8000/api/v1/users/me/```
 
 Управление пользователями (Администратор)
-```
-| Метод | URL | Описание |
-|-------|-----|----------|
-| GET |/api/v1/users/ |Список всех пользователей |
-| POST |/api/v1/users/ |Создать пользователя |
-| GET |/api/v1/users/<username>/ | Получить пользователя |
-| PATCH |/api/v1/users/<username>/ | Изменить пользователя |
-| DELETE |/api/v1/users/<username>/ | Удалить пользователя |
-```
+
+| Метод | URL | Описание | Доступ |
+|------|-----|----------|--------|
+| GET | /api/v1/users/ | Список пользователей | admin |
+| POST | /api/v1/users/ | Создание пользователя | admin |
+| GET | /api/v1/users/{username}/ | Получение пользователя | admin |
+| PATCH | /api/v1/users/{username}/ | Изменение пользователя | admin |
+| DELETE | /api/v1/users/{username}/ | Удаление пользователя | admin |
+
 
 Пример запроса создания:
 
-```OST /api/v1/users/```
+```POST /api/v1/users/```
 ```
 {
   "username": "new_user",
@@ -115,84 +128,135 @@ python manage.py runserver
 ```
 
 Titles (Произведения)
-```
-Метод	   URL	                 Описание
-GET	    /api/v1/titles/	       Список всех произведений
-POST	  /api/v1/titles/	       Создать произведение
-GET	    /api/v1/titles/<id>/	 Получить произведение
-PATCH	  /api/v1/titles/<id>/	 Изменить произведение
-DELETE  /api/v1/titles/<id>/	 Удалить произведение
-```
+
+| Метод | URL | Описание | Доступ |
+|------|-----|----------|--------|
+| GET | /api/v1/titles/ | Список произведений | Любой |
+| POST | /api/v1/titles/ | Создание произведения | admin |
+| GET | /api/v1/titles/{id}/ | Получение произведения | Любой |
+| PATCH | /api/v1/titles/{id}/ | Редактирование произведения | admin |
+| DELETE | /api/v1/titles/{id}/ | Удаление произведения | admin |
+
 
 Пример создания:
 
 ```POST /api/v1/titles/```
 ```
 {
-  "name": "Властелин колец",
-  "year": 1954,
-  "category": 1,
-  "genre": [1, 2]
+  "name": "1984",
+  "year": 1949,
+  "description": "Антиутопия",
+  "genre": ["drama"],
+  "category": "books"
+}
+```
+Ответ:
+```
+{
+  "id": 2,
+  "name": "1984",
+  "year": 1949,
+  "rating": null,
+  "description": "Антиутопия",
+  "genre": [
+    {
+      "name": "Драма",
+      "slug": "drama"
+    }
+  ],
+  "category": {
+    "name": "Книги",
+    "slug": "books"
+  }
 }
 ```
 
 Reviews (Отзывы)
-```
-Метод	   URL	                                          Описание
-GET	    /api/v1/titles/<title_id>/reviews/	            Список отзывов по произведению
-POST	  /api/v1/titles/<title_id>/reviews/	            Создать отзыв
-GET	    /api/v1/titles/<title_id>/reviews/<review_id>/	Получить отзыв
-PATCH	  /api/v1/titles/<title_id>/reviews/<review_id>/	Изменить отзыв
-DELETE	/api/v1/titles/<title_id>/reviews/<review_id>/	Удалить отзыв
-```
+
+| Метод | URL | Описание | Доступ |
+|------|-----|----------|--------|
+| GET | /api/v1/titles/{title_id}/reviews/ | Список отзывов | Любой |
+| POST | /api/v1/titles/{title_id}/reviews/ | Создание отзыва | user |
+| GET | /api/v1/titles/{title_id}/reviews/{id}/ | Получение отзыва | Любой |
+| PATCH | /api/v1/titles/{title_id}/reviews/{id}/ | Редактирование отзыва | Автор / moderator / admin |
+| DELETE | /api/v1/titles/{title_id}/reviews/{id}/ | Удаление отзыва | Автор / moderator / admin |
+
 
 Пример создания:
 
 ```POST /api/v1/titles/1/reviews/```
 ```
 {
-  "text": "Отличная книга!",
+  "text": "Отличный фильм!",
   "score": 10
+}
+```
+Ответ:
+```
+{
+  "id": 1,
+  "text": "Отличный фильм!",
+  "author": "alex",
+  "score": 10,
+  "pub_date": "2026-02-02T10:15:30Z"
 }
 ```
 
 Comments (Комментарии)
-```
-Метод	   URL	                                                                Описание
-GET	    /api/v1/titles/<title_id>/reviews/<review_id>/comments/	              Список комментариев к отзыву
-POST	  /api/v1/titles/<title_id>/reviews/<review_id>/comments/	              Создать комментарий
-GET	    /api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Получить комментарий
-PATCH	  /api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Изменить комментарий
-DELETE	/api/v1/titles/<title_id>/reviews/<review_id>/comments/<comment_id>/	Удалить комментарий
-```
+
+| Метод | URL | Описание | Доступ |
+|------|-----|----------|--------|
+| GET | /api/v1/titles/{title_id}/reviews/{review_id}/comments/ | Список комментариев | Любой |
+| POST | /api/v1/titles/{title_id}/reviews/{review_id}/comments/ | Создание комментария | user |
+| PATCH | /api/v1/titles/{title_id}/reviews/{review_id}/comments/{id}/ | Редактирование комментария | Автор / moderator / admin |
+| DELETE | /api/v1/titles/{title_id}/reviews/{review_id}/comments/{id}/ | Удаление комментария | Автор / moderator / admin |
+
 
 Пример:
 
 ```POST /api/v1/titles/1/reviews/1/comments/```
 ```
 {
-  "text": "Согласен с автором!"
+  "text": "Полностью согласен"
+}
+```
+Ответ:
+```
+{
+  "id": 1,
+  "text": "Полностью согласен",
+  "author": "mike",
+  "pub_date": "2026-02-02T10:20:10Z"
 }
 ```
 
 Categories (Категории) и Genres (Жанры)
-```
-Метод	   URL	                      Описание
-GET	    /api/v1/categories/	        Список категорий
-POST	  /api/v1/categories/	        Создать категорию (админ)
-DELETE	/api/v1/categories/<slug>/	Удалить категорию (админ)
-GET	    /api/v1/genres/	            Список жанров
-POST	  /api/v1/genres/	            Создать жанр (админ)
-DELETE	/api/v1/genres/<slug>/	    Удалить жанр (админ)
-```
+
+| Метод | URL | Описание | Доступ |
+|------|-----|----------|--------|
+| GET | /api/v1/categories/ | Список категорий | Любой |
+| POST | /api/v1/categories/ | Создание категории | admin |
+| DELETE | /api/v1/categories/{slug}/ | Удаление категории | admin |
+| GET | /api/v1/genres/ | Список жанров | Любой |
+| POST | /api/v1/genres/ | Создание жанра | admin |
+| DELETE | /api/v1/genres/{slug}/ | Удаление жанра | admin |
+
 
 Пример:
-```POST /api/v1/genres/```
+```GET /api/v1/genres/```
+
+Ответ:
 ```
-{
-  "name": "Фэнтези",
-  "slug": "fantasy"
-}
+[
+  {
+    "name": "Драма",
+    "slug": "drama"
+  },
+  {
+    "name": "Комедия",
+    "slug": "comedy"
+  }
+]
 ```
 
 ## Роли пользователей
