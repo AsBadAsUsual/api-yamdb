@@ -6,7 +6,7 @@ from reviews.validators import validate_score, validate_year
 
 
 class CategoryGenreBase(models.Model):
-    name = models.CharField('Название', max_length=NAME_MAX_LENGTH)
+    name = models.CharField("Название", max_length=NAME_MAX_LENGTH)
     slug = models.SlugField("Слаг", unique=True)
 
     class Meta:

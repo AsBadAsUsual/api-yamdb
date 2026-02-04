@@ -2,7 +2,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.db.models.functions import Round
-from rest_framework_simplejwt.tokens import AccessToken
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -14,11 +13,17 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import AccessToken
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 from api.filters import TitleFilter
 from api.pagination import StandardResultsSetPagination
-from api.permissions import (IsAdmin, IsAdminOrModeratorOrAuthor,
-                             IsAdminOrReadOnly)
+from api.permissions import (
+    IsAdmin,
+    IsAdminOrModeratorOrAuthor,
+    IsAdminOrReadOnly,
+)
 from api.serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -29,8 +34,6 @@ from api.serializers import (
     TitleWriteSerializer,
     UserSerializer,
 )
-from reviews.models import Category, Comment, Genre, Review, Title
-from users.models import User
 
 
 class APIGetToken(APIView):
@@ -45,11 +48,11 @@ class APIGetToken(APIView):
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        user = serializer.validated_data["user"]
         token = AccessToken.for_user(user)
 
         return Response(
-            {'token': str(token)},
+            {"token": str(token)},
             status=status.HTTP_200_OK,
         )
 

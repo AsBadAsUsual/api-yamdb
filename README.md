@@ -11,7 +11,7 @@ API для проекта **YaMDB** — базы данных произведе
 - Python 3.12  
 - Django  
 - Django REST Framework  
-- PostgreSQL / SQLite  
+- SQLite  
 - JWT для авторизации  
 
 ---

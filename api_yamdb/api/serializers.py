@@ -2,12 +2,8 @@ import datetime as dt
 import re
 
 from django.contrib.auth.tokens import default_token_generator
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound
-from rest_framework_simplejwt.tokens import AccessToken
-
 from reviews.constants import (
     EMAIL_MAX_LENGTH,
     FORBIDDEN_USERNAME,
@@ -29,7 +25,7 @@ class UsernameValidationMixin:
                 f"Имя {FORBIDDEN_USERNAME} запрещено"
             )
         return value
-    
+
     def validate(self, data):
         email = data.get("email")
         username = data.get("username")
@@ -59,14 +55,14 @@ class GetTokenSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(required=True)
 
     def validate(self, data):
-        user = get_object_or_404(User, username=data['username'])
+        user = get_object_or_404(User, username=data["username"])
 
         if not default_token_generator.check_token(
             user, data["confirmation_code"]
         ):
             raise serializers.ValidationError("Неверный код подтверждения!")
-        
-        data['user'] = user
+
+        data["user"] = user
 
         return data
 
