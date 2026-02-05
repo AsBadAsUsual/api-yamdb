@@ -52,6 +52,10 @@ python manage.py createsuperuser
 ```
 python manage.py runserver
 ```
+8. Наполняем базы данных данными из csv файлов
+```
+python manage.py import_csv
+```
 ## Использование API
 Регистрация пользователя
 
