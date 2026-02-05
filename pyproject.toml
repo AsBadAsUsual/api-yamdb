@@ -11,3 +11,10 @@ exclude = [
     "venv",
     "__pycache__",
 ]
+
+[tool.ruff.isort]
+known-first-party = [
+    "users",
+    "reviews",
+    "api",
+]

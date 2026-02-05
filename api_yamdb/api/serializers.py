@@ -4,6 +4,7 @@ import re
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+
 from reviews.constants import (
     EMAIL_MAX_LENGTH,
     FORBIDDEN_USERNAME,

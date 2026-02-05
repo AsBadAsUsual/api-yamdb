@@ -1,8 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
 from reviews.constants import (
     EMAIL_MAX_LENGTH,
-    NAME_MAX_LENGTH,
+    FIRST_LAST_NAME_MAX_LENGTH,
     ROLE_MAX_LENGTH,
     USERNAME_MAX_LENGTH,
 )
@@ -25,10 +26,12 @@ class User(AbstractUser):
         max_length=EMAIL_MAX_LENGTH, unique=True, verbose_name="Email"
     )
     first_name = models.CharField(
-        max_length=NAME_MAX_LENGTH, blank=True, verbose_name="Имя"
+        max_length=FIRST_LAST_NAME_MAX_LENGTH, blank=True, verbose_name="Имя"
     )
     last_name = models.CharField(
-        max_length=NAME_MAX_LENGTH, blank=True, verbose_name="Фамилия"
+        max_length=FIRST_LAST_NAME_MAX_LENGTH,
+        blank=True,
+        verbose_name="Фамилия",
     )
     role = models.CharField(
         "Роль",

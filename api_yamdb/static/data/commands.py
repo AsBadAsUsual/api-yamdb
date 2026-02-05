@@ -5,6 +5,7 @@ import sys
 import django
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+
 from reviews.models import Category, Comment, Genre, Review, Title
 
 project_path = "C:/Users/Ti/Documents/Pyton/api-yamdb/api_yamdb/"

@@ -14,8 +14,6 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Comment, Genre, Review, Title
-from users.models import User
 
 from api.filters import TitleFilter
 from api.pagination import StandardResultsSetPagination
@@ -34,6 +32,8 @@ from api.serializers import (
     TitleWriteSerializer,
     UserSerializer,
 )
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 
 class APIGetToken(APIView):
